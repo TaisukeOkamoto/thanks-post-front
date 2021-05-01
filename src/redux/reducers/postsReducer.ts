@@ -44,13 +44,10 @@ export const posts = (state = initialState, action: PostActions) => {
                 isLoading: action.payload.isLoading
             })
         case ActionTypes.SUCCESSDELETEPOST:
-            const deletedPostsId = action.payload.id
             return Object.assign({}, state, {
                 isLoading: action.payload.isLoading,
                 message: action.payload.message,
-                postItems: state.postItems.filter((post) => {
-                    deletedPostsId != post.id
-                })
+                postItems: action.payload.posts
             })
         case ActionTypes.FAILUREDELETEPOST:
             return Object.assign({}, state, {

@@ -24,11 +24,35 @@ const config: Configuration = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
             },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[path][name].[ext]?[contenthash]',
+                        },
+                    },
+                ],
+            },
+            {
+                test: /\.css/,
+                use: [
+                    "style-loader",
+                    {
+                        loader: "css-loader",
+                        options: { url: false }
+                    }
+                ]
+            }
         ],
     },
     mode: "development",
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        fallback: {
+            util: require.resolve("util/")
+        }
     },
     devtool: "inline-source-map",
     devServer: {

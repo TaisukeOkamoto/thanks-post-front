@@ -2,6 +2,8 @@ import { ActionTypes } from "../actionTypes"
 import { CustomFormData, PostItem } from "../types"
 import { Dispatch } from 'react';
 import axios from 'axios';
+import { apiUrlBase, getHeader } from "../../constants";
+import { getIdToken } from "../../auth0";
 
 type FetchPostsAction = {
     type: ActionTypes.FETCHPOST,
@@ -55,12 +57,12 @@ const failureFetchPosts = (): FailureFetchPostsAction => {
     }
 }
 
-export const fetchPost = (id: number) => {
+export const fetchPost = (id: string) => {
     return async (dispatch: Dispatch<PostActions>) => {
         try {
             dispatch(startFetchPosts())
             const response = await axios
-                .get(`http://localhost:5000/user/${id}/posts`)
+                .get(`${apiUrlBase}/user/${id}/posts`, getHeader(getIdToken))
             dispatch(successFetchPosts(response.data))
         } catch (e) {
             dispatch(failureFetchPosts());
@@ -101,13 +103,13 @@ const startUploadPost = (): UploadPostAction => {
     }
 }
 
-const successUploadPost = (posts: PostItem[]): SuccessUploadPostAction => {
+const successUploadPost = (data: { posts: PostItem[], message: string }): SuccessUploadPostAction => {
     return {
         type: ActionTypes.SUCCESSUPLOADPOST,
         payload: {
             isLoading: false,
-            message: "記事を投稿しました",
-            posts: posts
+            message: data.message,
+            posts: data.posts
         }
     }
 }
@@ -127,9 +129,10 @@ export const uploadPost = (submitData: CustomFormData) => {
         try {
             dispatch(startUploadPost())
             const response = await axios
-                .post('http://localhost:5000/posts', submitData, {
+                .post(`${apiUrlBase}/posts`, submitData, {
                     headers: {
-                        "content-type": "multipart/form-data"
+                        "content-type": "multipart/form-data",
+                        "Authorization": 'Bearer ' + getIdToken()
                     }
                 })
             dispatch(successUploadPost(response.data))
@@ -151,7 +154,7 @@ type SuccessDeletePostAction = {
     payload: {
         isLoading: boolean,
         message: string,
-        id: number
+        posts: PostItem[]
     }
 }
 type FailureDeletePostAction = {
@@ -171,13 +174,13 @@ const startDeletePost = (): DeletePostAction => {
     }
 }
 
-const successDeletePost = (id: number): SuccessDeletePostAction => {
+const successDeletePost = (data: { message: string, posts: PostItem[] }): SuccessDeletePostAction => {
     return {
         type: ActionTypes.SUCCESSDELETEPOST,
         payload: {
             isLoading: false,
-            message: "記事の削除に成功しました",
-            id: id
+            message: data.message,
+            posts: data.posts,
         }
     }
 }
@@ -197,7 +200,7 @@ export const deletePost = (id: number) => {
         try {
             dispatch(startDeletePost());
             const response = await axios
-                .delete(`http://localhost:5000/posts/${id}`)
+                .delete(`${apiUrlBase}/posts/${id}`, getHeader(getIdToken))
             dispatch(successDeletePost(response.data));
         } catch (e) {
             dispatch(failureDeletePost());

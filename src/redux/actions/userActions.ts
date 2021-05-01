@@ -2,10 +2,11 @@ import axios from "axios";
 import { Dispatch } from "react";
 import { Action } from "redux";
 import { ActionTypes } from "../actionTypes";
-import { UserItem } from "../types";
+import { CustomFormData, CustomProfileFormData, UserItem } from "../types";
 import firebase from '../../firebaseConfig';
-import { apiUrlBase, StatusCd } from "../../constants";
+import { apiUrlBase, getHeader, StatusCd } from "../../constants";
 import { getStatusMsg } from "../../util/MessageUtil";
+import { getIdToken } from "../../auth0";
 
 //　ユーザー取得処理 
 
@@ -133,54 +134,7 @@ const failureCreateUser = (statusCd: string, statusMsg: string): FailureCreateUs
 export const createUser = (name: string, email: string, password: string) => {
     return (dispatch: Dispatch<UserActions>) => {
         try {
-            dispatch(startCreateUser())
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((firebaseUser) => {
-                    if (firebaseUser.user) {
-                        const currentUser = firebaseUser.user;
-                        axios.post(apiUrlBase + 'users',
-                            {
-                                name,
-                                email,
-                                uid: firebaseUser.user.uid,
-                                provider_id: firebaseUser.user.providerId
-                            }
-                        ).then((res) => {
-                            currentUser.sendEmailVerification().then(() => {
-                                console.log(res.data);
-                                const user = {
-                                    id: res.data.user.id,
-                                    name: res.data.user.name,
-                                    email: res.data.user.email,
-                                    uid: res.data.user.uid,
-                                    providerId: res.data.user.provider_id,
-                                    isConfirmed: false
-                                }
-                                console.log(user);
-                                const msg = getStatusMsg(res.data.status);
-                                dispatch(successCreateUser(user, res.data.status, msg));
-                            }).catch((e) => {
-                                const msg = getStatusMsg(StatusCd.ok);
-                                dispatch(failureCreateUser(StatusCd.mu00002, msg));
-                            });
-                        }).catch((e) => {
-                            const msg = getStatusMsg(StatusCd.ok);
-                            dispatch(failureCreateUser(StatusCd.mu00002, msg));
-                        })
-
-                    } else {
-                        throw new Error();
-                    }
-                })
-                .catch((e) => {
-                    console.log(e)
-                    const msg = getStatusMsg(StatusCd.mu00002);
-                    dispatch(failureCreateUser(StatusCd.mu00002, msg));
-                });
         } catch (e) {
-            console.log(e)
-            const msg = getStatusMsg(StatusCd.mu00002);
-            dispatch(failureCreateUser(StatusCd.mu00002, msg));
         }
     }
 }
@@ -242,7 +196,6 @@ export const deleteUser = (id: number) => {
             const response = await axios
                 .delete(`${apiUrlBase}users/${id}`)
             dispatch(successDeleteUser(id));
-
         } catch (error) {
             dispatch(failureDeleteUser());
         }
@@ -314,10 +267,150 @@ export const confirmUser = () => {
     }
 }
 
+interface GetProfile {
+    type: ActionTypes.GETPROFILE,
+    payload: {
+        isLoading: boolean
+    }
+}
+
+interface SuccessGetProfile {
+    type: ActionTypes.SUCCESSGETPROFILE,
+    payload: {
+        isLoading: boolean,
+        user: UserItem
+    }
+}
+
+interface FailureGetProfile {
+    type: ActionTypes.FAILUREGETPROFILE,
+    payload: {
+        isLoading: boolean
+    }
+}
+
+const startGetProfile = (): GetProfile => {
+    return {
+        type: ActionTypes.GETPROFILE,
+        payload: {
+            isLoading: true,
+        }
+    }
+}
+
+const successGetProfile = (user: UserItem): SuccessGetProfile => {
+    return {
+        type: ActionTypes.SUCCESSGETPROFILE,
+        payload: {
+            isLoading: false,
+            user: user
+        }
+    }
+}
+
+const failureGetProfile = (): FailureGetProfile => {
+    return {
+        type: ActionTypes.FAILUREGETPROFILE,
+        payload: {
+            isLoading: false,
+        }
+    }
+}
+
+export const getProfile = (id: string) => {
+    return async (dispatch: Dispatch<UserActions>) => {
+        try {
+            dispatch(startGetProfile());
+            const response = await axios
+                .get(`${apiUrlBase}/users/${id}`)
+            const user = {
+                name: response.data.user.name,
+                profileText: response.data.user.profile_text,
+                imageUrl: response.data.user.image_url,
+                listUrl: response.data.user.list_url
+            }
+            dispatch(successGetProfile(user));
+        } catch (e) {
+            dispatch(failureGetProfile());
+        }
+    }
+}
+
+type UpdateProfile = {
+    type: ActionTypes.UPDATEPROFILE,
+    payload: {
+        isLoading: boolean
+    }
+}
+
+type SuccessUpdateProfile = {
+    type: ActionTypes.SUCCESSUPDATEPROFILE,
+    payload: {
+        isLoading: boolean,
+        user: UserItem
+    }
+}
+
+type FailureUpdateProfile = {
+    type: ActionTypes.FAILUREUPDATEPROFILE,
+    payload: {
+        isLoading: boolean
+    }
+}
+
+const startUpdateProfile = (): UpdateProfile => {
+    return {
+        type: ActionTypes.UPDATEPROFILE,
+        payload: {
+            isLoading: true
+        }
+    }
+}
+
+const successUpdateProfile = (user: UserItem): SuccessUpdateProfile => {
+    return {
+        type: ActionTypes.SUCCESSUPDATEPROFILE,
+        payload: {
+            isLoading: false,
+            user: user
+        }
+    }
+}
+
+const failureUpdateProfile = (): FailureUpdateProfile => {
+    return {
+        type: ActionTypes.FAILUREUPDATEPROFILE,
+        payload: {
+            isLoading: true
+        }
+    }
+}
+
+export const updateProfile = (id: string, submitData: CustomProfileFormData) => {
+    return async (dispatch: Dispatch<UserActions>) => {
+        try {
+            dispatch(startUpdateProfile());
+            const response = await axios
+                .patch(`${apiUrlBase}/users/${id}`,
+                    submitData, {
+                    headers: {
+                        "content-type": "multipart/form-data",
+                        "Authorization": 'Bearer ' + getIdToken()
+                    }
+                })
+            dispatch(successUpdateProfile(response.data.user))
+        } catch (e) {
+            dispatch(failureUpdateProfile());
+        }
+    }
+}
+
 export type UserActions =
     (
         | FetchUserAction | SuccessFetchUserAction | FailureFetchUserAction
         | DeleteUserAction | SuccessDeleteUserAction | FailureDeleteUserAction
         | CreateUser | SuccessCreateUser | FailureCreateUser
         | ConfirmUser | SuccessConfirmUser | FailureConfirmUser
+        | GetProfile | SuccessGetProfile | FailureGetProfile
+        | UpdateProfile | SuccessUpdateProfile | FailureUpdateProfile
     )

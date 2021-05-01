@@ -1,15 +1,13 @@
-import { UserActions } from "../actions/userActions";
+import { getProfile, UserActions } from "../actions/userActions";
 import { ActionTypes } from "../actionTypes";
 import { UserState } from "../types";
 
 const initialState: UserState = {
     userItem: {
-        id: 0,
         name: "",
-        email: "",
-        uid: "",
-        providerId: "",
-        isConfirmed: false
+        profileText: "",
+        imageUrl: "",
+        listUrl: ""
     },
     isLoading: false,
     isSignedIn: false,
@@ -66,6 +64,19 @@ const users = (state = initialState, action: UserActions) => {
             return Object.assign({}, state, {
                 isLoading: action.payload.isLoading,
                 statusMsg: action.payload.message
+            })
+        case ActionTypes.GETPROFILE:
+            return Object.assign({}, state, {
+                isLoading: action.payload.isLoading,
+            })
+        case ActionTypes.SUCCESSGETPROFILE:
+            return Object.assign({}, state, {
+                isLoading: action.payload.isLoading,
+                userItem: action.payload.user
+            })
+        case ActionTypes.FAILUREGETPROFILE:
+            return Object.assign({}, state, {
+                isLoading: action.payload.isLoading,
             })
         default:
             return state
