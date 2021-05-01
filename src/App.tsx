@@ -4,7 +4,6 @@ import Post from './container/Post';
 import Profile from './container/Profile';
 import PostDetail from './container/PostDetail';
 // import SignUp from './container/SignUp';
-import MailLinkedTemplate from './container/EmailSubmitted';
 import { url } from './constants';
 import Header from './container/Header';
 import About from './container/About';
@@ -14,7 +13,6 @@ import { connect } from 'react-redux';
 import { login } from './redux/actions/sessionActions';
 import { GlobalStyle } from './style';
 import ProfileEdit from './container/ProfileEdit';
-import EmailSubmitted from './container/EmailSubmitted';
 
 interface Props {
     isLoggedIn: boolean,
@@ -57,13 +55,11 @@ const App: React.FC<Props> = ({ isLoggedIn, login, isLoading }) => {
             <Switch>
                 {/* <Route exact path={url.singIn} component={SignIn} /> */}
                 <Route exact path={url.about} component={About} />
-                <Route path={url.mailLinkedTemplate} component={MailLinkedTemplate} />
                 {/* <Route path={url.signup} component={SignUp} /> */}
                 {/* <Route exact path="/" component={UserList} /> */}
                 <Route exact path={url.callback} component={Callback} />
                 <Route path={url.profile + ":id"} component={Profile} />
                 <Route path={url.postDetail + ":id"} component={PostDetail} />
-                <Route path={url.emailSubmitted} component={EmailSubmitted} />
                 <PrivateRoute path={url.profileEdit + ":id"} component={ProfileEdit}
                     isLoggedIn={isLoggedIn} isLoading={isLoading} />
                 <PrivateRoute path={url.post} component={Post}
