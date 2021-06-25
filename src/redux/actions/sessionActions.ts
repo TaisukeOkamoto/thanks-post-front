@@ -2,10 +2,12 @@ import { Dispatch } from "react";
 import { ActionTypes } from "../actionTypes";
 import { getIdToken, getUserId, getUserInfo, isAuthenticated } from '../../auth0';
 import axios from "axios";
-import { apiUrlBase, getHeader, getOriginBase, prodUrl } from "../../constants";
+import { getApiUrlBase, getHeader, getOriginBase, prodUrl } from "../../constants";
 import { logoutFromAuth0 } from "../../auth0"
 import { lock } from '../../lock';
 import { LoginUser } from "../types";
+
+const apiUrlBase = getApiUrlBase();
 
 type LogoutAction = {
     type: ActionTypes.LOGOUT,

@@ -2,8 +2,10 @@ import { ActionTypes } from "../actionTypes"
 import { CustomFormData, PostItem } from "../types"
 import { Dispatch } from 'react';
 import axios from 'axios';
-import { apiUrlBase, getHeader } from "../../constants";
+import { getApiUrlBase, getHeader } from "../../constants";
 import { getIdToken } from "../../auth0";
+
+const apiUrlBase = getApiUrlBase();
 
 type FetchPostsAction = {
     type: ActionTypes.FETCHPOST,
@@ -198,6 +200,7 @@ const failureDeletePost = (): FailureDeletePostAction => {
 export const deletePost = (id: number) => {
     return async (dispatch: Dispatch<PostActions>) => {
         try {
+            const apiUrlBase = getApiUrlBase();
             dispatch(startDeletePost());
             const response = await axios
                 .delete(`${apiUrlBase}/posts/${id}`, getHeader(getIdToken))

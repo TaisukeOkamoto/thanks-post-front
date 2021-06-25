@@ -2,11 +2,15 @@ import path from 'path';
 import webpack from 'webpack';
 import { Configuration } from 'webpack';
 import dotenv from "dotenv"
+import * as webpackDevServer from 'webpack-dev-server';
+
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const env = dotenv.config().parsed;
 
 const defineEnv = new webpack.DefinePlugin({
-    'process.env': JSON.stringify(env)
+    'process.env': JSON.stringify(env),
 })
 
 const config: Configuration = {
@@ -15,9 +19,13 @@ const config: Configuration = {
     output: {
         path: path.join(__dirname, 'dist'),
         filename: 'bundle.js',
-        publicPath: '/assets',
+        publicPath: '/',
+        // publicPath: '/assets/',
     },
-    plugins: [defineEnv],
+    plugins: [defineEnv, new HtmlWebpackPlugin({
+        template: "../static/index.html",
+        hash: true, // This is useful for cache busting
+    })],
     module: {
         rules: [
             {
@@ -47,7 +55,7 @@ const config: Configuration = {
             }
         ],
     },
-    mode: "development",
+    // mode: "development",
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
         fallback: {

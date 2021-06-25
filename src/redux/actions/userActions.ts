@@ -4,9 +4,12 @@ import { Action } from "redux";
 import { ActionTypes } from "../actionTypes";
 import { CustomFormData, CustomProfileFormData, UserItem } from "../types";
 import firebase from '../../firebaseConfig';
-import { apiUrlBase, getHeader, StatusCd } from "../../constants";
+import { getApiUrlBase, getHeader, StatusCd } from "../../constants";
 import { getStatusMsg } from "../../util/MessageUtil";
 import { getIdToken } from "../../auth0";
+
+
+const apiUrlBase = getApiUrlBase();
 
 //　ユーザー取得処理 
 

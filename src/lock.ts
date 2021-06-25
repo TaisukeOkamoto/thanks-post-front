@@ -2,7 +2,7 @@ import Auth0Lock from 'auth0-lock';
 import { AiOutlineUser } from "react-icons/ai";
 import userIcon from './assets/user.png'
 import { useHistory } from 'react-router-dom';
-import { url } from './constants';
+import { devEnv, prodEnv, url } from './constants';
 
 
 interface Auth0LockAdditionalTextSignUpField {
@@ -37,7 +37,11 @@ const additionalSignUpFields: Auth0LockAdditionalTextSignUpField = {
     icon: userIcon
 }
 
-const callbackUrl = "http://localhost:3000/callback"
+let callbackUrl = "http://localhost:3000/callback"
+
+if (process.env.NODE_ENV == prodEnv) {
+    callbackUrl = "https://thankspost.com/callback"
+}
 
 const options = {
     closable: true,
@@ -51,7 +55,8 @@ const options = {
     },
     theme: {
         primaryColor: '#45A8A8',
-        foregroundColor: '#F2F5F7'
+        foregroundColor: '#F2F5F7',
+        logo: 'https://thankspost.com/logo.png'
     },
     additionalSignUpFields: [additionalSignUpFields],
     loginAfterSignUp: false,
@@ -124,9 +129,18 @@ const options = {
 //     return Auth;
 // };
 
+let clientId = "";
+let domain = "";
 
-const clientId = "bqj8OolSk95YguyP8zXLcKAwjGBQwbeT";
-const domain = "thanks-post.jp.auth0.com";
+if (process.env.NODE_ENV == devEnv) {
+    clientId = process.env.AUTH_CLIENT_ID_DEV ? process.env.AUTH_CLIENT_ID_DEV : "";
+    domain = process.env.AUTH_DOMAIN_DEV ? process.env.AUTH_DOMAIN_DEV : "";
+} else if (process.env.NODE_ENV == prodEnv) {
+    clientId = process.env.AUTH_CLIENT_ID_PRODUCTION ? process.env.AUTH_CLIENT_ID_PRODUCTION : "";
+    domain = process.env.AUTH_DOMAIN_PRODUCTION ? process.env.AUTH_DOMAIN_PRODUCTION : "";
+}
+
+
 export const lock = new Auth0Lock(clientId, domain, options);
 let accessToken = null;
 let profile = null;

@@ -1,5 +1,8 @@
 import { getIdToken } from "./auth0"
 
+export const devEnv = 'development'
+export const prodEnv = 'production'
+
 export enum StatusCd {
     ok = "ok",
     mu00001 = "mu00001",
@@ -21,9 +24,9 @@ export const url = {
 }
 
 export const getOriginBase = () => {
-    if (process.env.NODE_ENV == 'development') {
+    if (process.env.NODE_ENV == devEnv) {
         return "http://localhost:3000"
-    } else if (process.env.NODE_ENV == 'production') {
+    } else if (process.env.NODE_ENV == prodEnv) {
         return 'https://thankspost.com'
     } else {
         return ""
@@ -32,7 +35,15 @@ export const getOriginBase = () => {
 
 export const prodUrl = 'https://thankspost.com';
 
-export const apiUrlBase = "http://localhost:5000"
+export const getApiUrlBase = () => {
+    if (process.env.NODE_ENV == devEnv) {
+        return "http://localhost:5000"
+    } else if (process.env.NODE_ENV == prodEnv) {
+        return 'https://api.thankspost.com'
+    } else {
+        return ""
+    }
+}
 
 export const getHeader = (extractIdToken: typeof getIdToken) =>
     ({ headers: { Authorization: 'Bearer ' + extractIdToken() } })
