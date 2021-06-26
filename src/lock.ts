@@ -34,7 +34,7 @@ const additionalSignUpFields: Auth0LockAdditionalTextSignUpField = {
     name: "name",
     placeholder: "ユーザー名",
     validator: nameInputValidator,
-    icon: userIcon
+    icon: userIcon,
 }
 
 let callbackUrl = "http://localhost:3000/callback"
@@ -62,8 +62,10 @@ const options = {
     loginAfterSignUp: false,
     languageDictionary: {
         success: {
-            signUp: '確認メールを送信しました。ご登録のアドレスから確認をお願いします。'
+            signUp: '確認メールを送信しました。ご登録のアドレスから確認をお願いします。',
         },
+        title: "",
+        signUpTitle: ""
     },
 }
 
